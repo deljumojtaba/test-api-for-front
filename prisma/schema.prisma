@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// use .env.development to use the local database  //todo
+// use .env.production to use the remote database   //todo
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+  url      = "postgres://postgres:m9002611@postgres:5432/test-vue-db"
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique()
+  hash      String
+  hashedRt  String?
+  mobile    String?  @unique
+  firstName String?
+  lastName  String?
+  role      Role     @default(USER)
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Resturant {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  phone     String?  @unique
+  name      String?
+  items     Item[]
+  orders    Order[]
+
+
+  @@map("resturants")
+}
+
+model Item {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  description String?
+  name        String?
+  price       Int
+  resturant   Resturant[]
+  order       Order[]
+
+
+  @@map("items")
+}
+
+model Order {
+  number      Int       @unique @default(autoincrement())
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  items       Item[]
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  resturant   Resturant @relation(fields: [resturantId], references: [id])
+  resturantId String
+
+  @@map("orders")
+}
